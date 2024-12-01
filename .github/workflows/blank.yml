@@ -1,0 +1,350 @@
+from sklearn.linear_model import LinearRegression
+import pandas as pd
+import sys
+from PyQt6 import uic
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableView, QLineEdit, QMessageBox
+from PyQt6.QtCore import QAbstractTableModel, Qt
+
+
+class PandasModel(QAbstractTableModel):
+    def __init__(self, data):
+        super().__init__()
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        return self._data.shape[1]
+
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
+            return str(self._data.iloc[index.row(), index.column()])
+        return None
+
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
+                return self._data.columns[section]
+            if orientation == Qt.Orientation.Vertical:
+                return str(self._data.index[section])
+        return None
+
+
+class MyWindget(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi("u.ui", self)
+        self.tableView = QTableView(self)
+        self.pushButton.clicked.connect(self.run)
+        self.pushButton_1.clicked.connect(self.world_rank)
+        self.pushButton_2.clicked.connect(self.national_rank)
+        self.pushButton_3.clicked.connect(self.quality_of_edu)
+        self.pushButton_4.clicked.connect(self.employment)
+        self.pushButton_5.clicked.connect(self.quality_of_fac)
+        self.pushButton_6.clicked.connect(self.broad_impact)
+        self.pushButton_7.clicked.connect(self.show_table)
+        self.lineEdit = QLineEdit(self)
+        self.lineEdit_2 = QLineEdit(self)
+        self.lineEdit_3 = QLineEdit(self)
+        self.lineEdit_4 = QLineEdit(self)
+        self.lineEdit_5 = QLineEdit(self)
+        self.lineEdit_6 = QLineEdit(self)
+        self.lineEdit_7 = QLineEdit(self)
+        self.d2 = pd.read_csv('DATA.csv')
+        self.d1 = self.d2[::]
+        del self.d1['publications']
+        del self.d1['citations']
+        del self.d1['year']
+        del self.d1['institution']
+        del self.d1['country']
+        del self.d1['influence']
+        del self.d1['score']
+        del self.d1['patents']
+        self.d1['broad_impact'].fillna(round(self.d1['broad_impact'].median()), inplace=True)
+
+    def world_rank(self):
+        X = self.d1.drop('world_rank', axis=1)
+        Y = self.d1['world_rank']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n1:
+            if not n2:
+                n2 = round(self.d1['national_rank'].median())
+            else:
+                n2 = float(n2)
+            if not n3:
+                n3 = round(self.d1['quality_of_education'].median())
+            else:
+                n3 = float(n3)
+            if not n4:
+                n4 = round(self.d1['alumni_employment'].median())
+            else:
+                n4 = float(n4)
+            if not n5:
+                n5 = round(self.d1['quality_of_faculty'].median())
+            else:
+                n5 = float(n5)
+            if not n6:
+                n6 = round(self.d1['broad_impact'].median())
+            else:
+                n6 = float(n6)
+            OB = [n2, n3, n4, n5, n6]
+            YN = lr.predict(OB)
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n1)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+    def national_rank(self):
+        X = self.d1.drop('national_rank', axis=1)
+        Y = self.d1['national_rank']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n2:
+            if not n1:
+                n1 = round(self.d1['world_rank'].median())
+            else:
+                n1 = float(n1)
+            if not n3:
+                n3 = round(self.d1['quality_of_education'].median())
+            else:
+                n3 = float(n3)
+            if not n4:
+                n4 = round(self.d1['alumni_employment'].median())
+            else:
+                n4 = float(n4)
+            if not n5:
+                n5 = round(self.d1['quality_of_faculty'].median())
+            else:
+                n5 = float(n5)
+            if not n6:
+                n6 = round(self.d1['broad_impact'].median())
+            else:
+                n6 = float(n6)
+            OB = [[n1, n3, n4, n5, n6]]
+            YN = lr.predict(OB)[0]
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n2)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+
+    def quality_of_edu(self):
+        X = self.d1.drop('quality_of_education', axis=1)
+        Y = self.d1['quality_of_education']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n3:
+            if not n1:
+                n1 = round(self.d1['world_rank'].median())
+            else:
+                n1 = float(n1)
+            if not n2:
+                n2 = round(self.d1['national_rank'].median())
+            else:
+                n2 = float(n2)
+            if not n4:
+                n4 = round(self.d1['alumni_employment'].median())
+            else:
+                n4 = float(n4)
+            if not n5:
+                n5 = round(self.d1['quality_of_faculty'].median())
+            else:
+                n5 = float(n5)
+            if not n6:
+                n6 = round(self.d1['broad_impact'].median())
+            else:
+                n6 = float(n6)
+            OB = [[n1, n2, n4, n5, n6]]
+            YN = lr.predict(OB)[0]
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n3)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+
+    def employment(self):
+        X = self.d1.drop('alumni_employment', axis=1)
+        Y = self.d1['alumni_employment']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n4:
+            if not n1:
+                n1 = round(self.d1['world_rank'].median())
+            else:
+                n1 = float(n1)
+            if not n2:
+                n2 = round(self.d1['national_rank'].median())
+            else:
+                n2 = float(n2)
+            if not n3:
+                n3 = round(self.d1['quality_of_education'].median())
+            else:
+                n3 = float(n3)
+            if not n5:
+                n5 = round(self.d1['quality_of_faculty'].median())
+            else:
+                n5 = float(n5)
+            if not n6:
+                n6 = round(self.d1['broad_impact'].median())
+            else:
+                n6 = float(n6)
+            OB = [[n1, n2, n3, n5, n6]]
+            YN = lr.predict(OB)[0]
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n4)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+
+    def quality_of_fac(self):
+        X = self.d1.drop('quality_of_faculty', axis=1)
+        Y = self.d1['quality_of_faculty']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n4:
+            if not n1:
+                n1 = round(self.d1['world_rank'].median())
+            else:
+                n1 = float(n1)
+            if not n2:
+                n2 = round(self.d1['national_rank'].median())
+            else:
+                n2 = float(n2)
+            if not n3:
+                n3 = round(self.d1['quality_of_education'].median())
+            else:
+                n3 = float(n3)
+            if not n4:
+                n4 = round(self.d1['alumni_employment'].median())
+            else:
+                n4 = float(n4)
+            if not n6:
+                n6 = round(self.d1['broad_impact'].median())
+            else:
+                n6 = float(n6)
+            OB = [[n1, n2, n3, n4, n6]]
+            YN = lr.predict(OB)[0]
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n5)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+
+    def broad_impact(self):
+        X = self.d1.drop('broad_impact', axis=1)
+        Y = self.d1['broad_impact']
+        lr = LinearRegression()
+        lr.fit(X, Y)
+        n1 = self.lineEdit_2.text()
+        n2 = self.lineEdit_3.text()
+        n3 = self.lineEdit_4.text()
+        n4 = self.lineEdit_5.text()
+        n5 = self.lineEdit_6.text()
+        n6 = self.lineEdit_7.text()
+        if not n4:
+            if not n1:
+                n1 = round(self.d1['world_rank'].median())
+            else:
+                n1 = float(n1)
+            if not n2:
+                n2 = round(self.d1['national_rank'].median())
+            else:
+                n2 = float(n2)
+            if not n3:
+                n3 = round(self.d1['quality_of_education'].median())
+            else:
+                n3 = float(n3)
+            if not n4:
+                n4 = round(self.d1['alumni_employment'].median())
+            else:
+                n4 = float(n4)
+            if not n5:
+                n5 = round(self.d1['quality_of_faculty'].median())
+            else:
+                n5 = float(n5)
+            OB = [[n1, n2, n3, n4, n5]]
+            YN = lr.predict(OB)[0]
+            self.lineEdit.setText(str(YN))
+        else:
+            self.lineEdit.setText(n6)
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.lineEdit_6.clear()
+        self.lineEdit_7.clear()
+
+    def show_table(self):
+        odel = PandasModel(self.d2)
+        self.tableView.setModel(odel)
+        self.tableView.resizeColumnsToContents()
+        self.tableView.resizeRowsToContents()
+
+    def run(self):
+        valid = QMessageBox.question(
+            self, '', """Инструкция к использованию: 1.	Кнопка «?» в левом верхнем углу – памятка по работе с приложением
+            2.	Большое поле в правом верхнем углу – там будет показана таблица (датафрейм)
+            3.	Кнопка «show table» - выводит таблицу в поле из пункта 2
+            4.	Поле между Кнопка «?» и кнопками внизу – текстовое поле, где после нажатия на одну из кнопок внизу экрана в этом поле выводятся результаты от модели
+            5.	Кнопки внизу экрана – кнопки с названиями из датафрейма. После их нажатия модель, по данным, введенным в поле из пункта 4 модель спрогнозирует значения выбранной колонки и выведет пользователю
+            6.	Поля под кнопками – поля для ввода информации от пользователя. Каждое поле соответствует кнопке над ним. После каждого нажатия на любую из кнопок все поля очищаются
+            """)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.orig_argv)
+    ex = MyWindget()
+    ex.show()
+    sys.exit(app.exec())
